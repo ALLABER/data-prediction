@@ -1,39 +1,35 @@
-import csv
-
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+import pandas as pd
 
 
-# 3. Написать функцию нормализации данных (алгоритм нормализации взять согласно варианту, примеры реализации в списке
-# источников). Для нормализации допускается использование готовых функций из сторонних библиотек.
+# 3. Функция нормализации данных MinMax
 def run_task_three():
     data = np.loadtxt("data/kc_house_data.csv", delimiter=',', skiprows=1)
     data = np.array(data, dtype=np.float32)
     scaler = MinMaxScaler()
     normalized_data = scaler.fit_transform(data)
 
+    df = pd.DataFrame(normalized_data)
     # Сохранение нормализованные данные в файл "normalized_data.csv"
-    with open('data/normalized_data.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(normalized_data)
+    df.to_csv('data/normalized_data.csv', encoding='utf-8', index=False)
 
 
+# 4. Для каждого нормализованного столбца рассчитать и вывести
+# минимальное, максимальное и среднее значения, чтобы определить корректность нормализации.
 def run_task_four():
-    data = np.loadtxt("data/normalized_data.csv", delimiter=',')
-    data = np.array(data, dtype=np.float32)
+    df = pd.read_csv('data/normalized_data.csv')
 
-    for i in range(data.shape[1]):
-        column = data[:, i]
-        normalized_column = (column - np.mean(column)) / np.std(column)
-        data[:, i] = normalized_column
+    min_values = df.min()
+    max_values = df.max()
+    mean_values = df.mean()
 
-        # Рассчитать и вывести минимальное, максимальное и среднее значения
-        print(f"Столбец {i + 1}")
-        print(f"Минимальное значение: {np.min(normalized_column)}")
-        print(f"Максимальное значение: {np.max(normalized_column)}")
-        print(f"Среднее значение: {np.mean(normalized_column)}\n")
+    print(f"Минимальное значение:\n{min_values.to_string()}")
+    print(f"Максимальное значение:\n{max_values.to_string()}")
+    print(f"Среднее значение:\n{mean_values.to_string()}\n")
 
 
+# 5.1 Функция расчёта ошибки RMSE
 def run_task_five_one(initial_data, normalized_data):
     global actual, predicted
 
@@ -55,6 +51,7 @@ def run_task_five_one(initial_data, normalized_data):
     return np.sqrt(np.mean((actual - predicted) ** 2))
 
 
+# 5.2 Функция расчёта градиента функции ошибки RMSE
 def run_task_five_two(initial_data, normalized_data):
     global actual, predicted
     gradient_array = np.zeros((initial_data.shape[1],))
@@ -80,10 +77,10 @@ def run_task_five_two(initial_data, normalized_data):
 
 
 def run_task_five():
-    initial_data = np.loadtxt("data/kc_house_data.csv", delimiter=',', skiprows=1)
+    initial_data = pd.read_csv('data/kc_house_data.csv', delimiter=',', skiprows=1)
     initial_data = np.array(initial_data, dtype=np.float32)
 
-    normalized_data = np.loadtxt("data/normalized_data.csv", delimiter=',')
+    normalized_data = pd.read_csv('data/normalized_data.csv', delimiter=',', skiprows=1)
     normalized_data = np.array(normalized_data, dtype=np.float32)
 
     rmse = run_task_five_one(initial_data, normalized_data)
@@ -93,12 +90,21 @@ def run_task_five():
     print(f"Результат функции расчёта градиента ошибки: {gradient_array}")
 
 
+# 6 Написать функцию градиентного спуска для коэффициентов линейной регрессии.
+# Во время градиентного спуска шаг рассчитывать по написанной ранее производной функции ошибки.
 def run_task_six():
-    pass
+    initial_data = np.loadtxt("data/kc_house_data.csv", delimiter=',', skiprows=1)
+    initial_data = np.array(initial_data, dtype=np.float32)
+
+    normalized_data = np.loadtxt("data/normalized_data.csv", delimiter=',')
+    normalized_data = np.array(normalized_data, dtype=np.float32)
+
+    gradient_array = run_task_five_two(initial_data, normalized_data)
+
 
 
 if __name__ == '__main__':
     run_task_three()
     run_task_four()
     run_task_five()
-    run_task_six()
+    # run_task_six()
